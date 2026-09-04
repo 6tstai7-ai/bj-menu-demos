@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+  <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <title>La Boîte Jaune — Menu Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@500;700;800&family=Pacifico&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+  <style>
+    :root {
+      --yellow: #d4a017;
+      --yellow-deep: #b8860b;
+      --yellow-soft: #f3e2a0;
+      --ink: #0a0907;
+      --panel: #12100c;
+      --panel-edge: #2a2416;
+      --cream: #fff6d6;
+      --muted: #b5a67a;
+      --badge: #1f6b45;
+      --badge-text: #e8fff2;
+      --slide-ms: 700ms;
+      --special-red: #c41e1e;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --rule: rgba(212, 160, 23, 0.28);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--ink);
+      color: var(--cream);
+      font-family: "DM Sans", system-ui, sans-serif;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    img, .thumb, .thumb-full, .qr img, .special-photo-wrap img {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: none;
+      -webkit-touch-callout: none;
+    }
+
+    body.single .board { grid-template-columns: 1fr; }
+    body.single .screen:not(.active-single) { display: none; }
+
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      height: 100vh;
+      padding: 0;
+      background: #000;
+    }
+
+    .screen {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--panel);
+      border: none;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: none;
+    }
+
+    .screen + .screen {
+      border-left: 3px solid var(--yellow);
+    }
+
+    .screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.65rem 1rem 0.55rem;
+      border-bottom: 2px solid var(--yellow);
+      background: var(--yellow);
+      color: #111;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: center;
+    }
+
+    .logo-mark {
+      width: 52px;
+      height: 52px;
+      border: 3px solid #111;
+      border-radius: 0;
+      background: var(--cream);
+      color: #111;
+      display: grid;
+      place-items: center;
+      box-shadow: 3px 3px 0 #111;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .logo-mark .la {
+      position: absolute;
+      top: 3px;
+      left: 5px;
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .logo-mark .boite {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 1.15rem;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      margin-top: 2px;
+    }
+
+    .logo-mark .jaune {
+      font-family: "Pacifico", cursive;
+      font-size: 0.85rem;
+      line-height: 0.85;
+      margin-top: -2px;
+    }
+
+    .logo-mark .hat {
+      position: absolute;
+      top: -2px;
+      right: 10px;
+      width: 14px;
+      height: 11px;
+      border: 2px solid #111;
+      border-radius: 6px 6px 1px 1px;
+      transform: rotate(18deg);
+    }
+
+    .logo-mark .hat::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -5px;
+      width: 5px;
+      height: 5px;
+      border: 2px solid #111;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background: var(--cream);
+    }
+
+    .logo-copy h1 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      letter-spacing: 0.04em;
+      color: #111;
+      line-height: 0.95;
+    }
+
+    .logo-copy p {
+      color: rgba(17, 17, 17, 0.7);
+      font-size: clamp(0.7rem, 0.95vw, 0.85rem);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 0.1rem;
+    }
+
+    .section-label {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(1.1rem, 1.8vw, 1.55rem);
+      letter-spacing: 0.1em;
+      color: #111;
+      white-space: nowrap;
+      border-left: 3px solid #111;
+      padding-left: 0.65rem;
+      line-height: 1;
+    }
+
+    .stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      padding: 0.65rem 0.9rem 0.35rem;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0.65rem 0.9rem 0.35rem;
+      opacity: 0;
+      transform: translateX(28px);
+      pointer-events: none;
+      transition:
+        opacity var(--slide-ms) var(--ease-out-expo),
+        transform var(--slide-ms) var(--ease-out-expo);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .slide.is-active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    .slide.is-exit {
+      opacity: 0;
+      transform: translateX(-20px);
+      z-index: 1;
+    }
+
+    .slide-title {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(1.45rem, 2.3vw, 2.1rem);
+      letter-spacing: 0.08em;
+      color: var(--yellow);
+      border-bottom: 2px solid var(--rule);
+      padding-bottom: 0.35rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .items {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      gap: 0;
+    }
+
+    .items.photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+      grid-auto-rows: 1fr;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.55rem 0.85rem;
+      align-items: center;
+      padding: 0.55rem 0.15rem;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--rule);
+      border-radius: 0;
+      min-height: 0;
+      opacity: 1;
+      transform: none;
+    }
+
+    .item.with-photo {
+      grid-template-columns: 76px 1fr auto;
+      gap: 0.65rem;
+      padding: 0.4rem 0.1rem;
+      align-items: center;
+    }
+
+    .item.photo-card {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto;
+      padding: 0;
+      overflow: hidden;
+      gap: 0;
+      min-height: 0;
+      border: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      position: relative;
+    }
+
+    .item.featured .price {
+      color: var(--yellow);
+    }
+
+    .item.is-focus {
+      background: linear-gradient(90deg, rgba(212, 160, 23, 0.14), transparent 70%);
+      box-shadow: inset 3px 0 0 var(--yellow);
+    }
+
+    .item.is-enter {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .thumb {
+      width: 76px;
+      height: 76px;
+      border-radius: 0;
+      object-fit: cover;
+      display: block;
+      background: #2a2416;
+      border: 1px solid rgba(212, 160, 23, 0.35);
+    }
+
+    .photo-card .thumb-full {
+      width: 100%;
+      height: 100%;
+      min-height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-card .card-meta {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.35rem;
+      align-items: end;
+      padding: 0.45rem 0.55rem 0.5rem;
+      background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.92));
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .item-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.12rem 0.4rem;
+      border-radius: 0;
+      background: var(--badge);
+      color: var(--badge-text);
+      font-size: clamp(0.6rem, 0.85vw, 0.72rem);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .badge.special {
+      background: var(--special-red);
+      color: #ffe8e8;
+    }
+
+    .name {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(1.45rem, 2.4vw, 2.25rem);
+      letter-spacing: 0.03em;
+      line-height: 1.02;
+      color: var(--cream);
+      text-shadow: 0 0 0 transparent;
+    }
+
+    .photo-card .name {
+      font-size: clamp(1.25rem, 2vw, 1.75rem);
+    }
+
+    .desc {
+      color: var(--muted);
+      font-size: clamp(0.78rem, 1vw, 0.95rem);
+      font-weight: 500;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .price {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(1.7rem, 2.8vw, 2.65rem);
+      color: var(--yellow-soft);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      line-height: 1;
+      text-shadow: 0 0 0 transparent;
+    }
+
+    .item.is-focus .name,
+    .item.is-focus .price {
+      color: #fff8dc;
+      text-shadow:
+        0 0 8px rgba(243, 226, 160, 0.85),
+        0 0 18px rgba(212, 160, 23, 0.55),
+        0 0 32px rgba(212, 160, 23, 0.28);
+    }
+
+    .item.is-focus .desc {
+      color: var(--yellow-soft);
+    }
+
+
+    /* ——— SPECIAL ——— */
+    .slide.special-slide {
+      transform: none;
+      background: #0c0a06;
+      border-radius: 0;
+      overflow: hidden;
+      border: none;
+      inset: 0;
+    }
+
+    .slide.special-slide.is-active {
+      transform: none;
+    }
+
+    .special-hero {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .special-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(212, 160, 23, 0.32), transparent 52%),
+        #100d08;
+    }
+
+    .special-rays {
+      position: absolute;
+      inset: -40%;
+      background: repeating-conic-gradient(
+        from 0deg,
+        rgba(212, 160, 23, 0.12) 0deg 8deg,
+        transparent 8deg 16deg
+      );
+      opacity: 0;
+      transform: scale(0.7) rotate(0deg);
+      will-change: transform, opacity;
+    }
+
+    .special-photo-wrap {
+      position: relative;
+      z-index: 2;
+      width: min(82%, 460px);
+      aspect-ratio: 1.12 / 1;
+      border-radius: 0;
+      overflow: hidden;
+      border: 4px solid var(--yellow);
+      box-shadow: 0 22px 48px rgba(0, 0, 0, 0.55);
+      opacity: 0;
+      transform: scale(0.78) rotate(-3deg);
+      will-change: transform, opacity;
+    }
+
+    .special-photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .special-stamp {
+      position: absolute;
+      z-index: 4;
+      top: 7%;
+      left: 50%;
+      transform: translateX(-50%) scale(1.55) rotate(-8deg);
+      opacity: 0;
+      padding: 0.35rem 1.15rem;
+      background: var(--special-red);
+      color: #fff;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.45rem);
+      letter-spacing: 0.12em;
+      border: 3px solid #fff;
+      box-shadow: 4px 4px 0 #111;
+      white-space: nowrap;
+      will-change: transform, opacity;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+    }
+
+    .special-stamp.is-lit {
+      box-shadow:
+        4px 4px 0 #111,
+        0 0 18px rgba(255, 80, 80, 0.55),
+        0 0 36px rgba(212, 160, 23, 0.35);
+    }
+
+    .special-copy .name.is-lit,
+    .special-copy .price.is-lit {
+      text-shadow:
+        0 0 10px rgba(243, 226, 160, 0.9),
+        0 0 22px rgba(212, 160, 23, 0.55);
+      color: #fff8dc;
+    }
+
+    .special-copy {
+      position: absolute;
+      z-index: 3;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 1.2rem 1.15rem 1rem;
+      background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.9) 38%);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.75rem;
+      align-items: end;
+      opacity: 0;
+      transform: translateY(20px);
+      will-change: transform, opacity;
+    }
+
+    .special-copy .eyebrow {
+      color: var(--yellow);
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: clamp(0.7rem, 1vw, 0.85rem);
+      margin-bottom: 0.15rem;
+    }
+
+    .special-copy .name {
+      font-size: clamp(2.1rem, 3.6vw, 3.2rem);
+    }
+
+    .special-copy .desc {
+      white-space: normal;
+      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+      margin-top: 0.12rem;
+    }
+
+    .special-copy .price {
+      font-size: clamp(2.5rem, 4.4vw, 3.8rem);
+      color: var(--yellow-soft);
+    }
+
+    .special-flash {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      background: #fff8dc;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .special-curtain {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      pointer-events: none;
+    }
+
+    .special-curtain span {
+      background: var(--yellow);
+      transform: scaleX(1);
+    }
+
+    .special-curtain span:first-child { transform-origin: left; }
+    .special-curtain span:last-child { transform-origin: right; }
+
+    .screen-footer {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: center;
+      margin: 0;
+      padding: 0.4rem 0.85rem;
+      border-radius: 0;
+      background: #0d0b08;
+      border: none;
+      border-top: 2px solid var(--rule);
+      flex-shrink: 0;
+    }
+
+    .qr {
+      width: 56px;
+      height: 56px;
+      border-radius: 0;
+      background: #fff;
+      padding: 3px;
+      flex-shrink: 0;
+    }
+
+    .qr img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .loyalty h2 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(1rem, 1.55vw, 1.35rem);
+      letter-spacing: 0.04em;
+      color: var(--yellow-soft);
+      line-height: 1.05;
+    }
+
+    .loyalty p {
+      margin-top: 0.1rem;
+      color: var(--muted);
+      font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+      font-weight: 700;
+    }
+
+    .dots {
+      display: flex;
+      gap: 0.35rem;
+      justify-content: flex-end;
+      padding: 0.25rem 0.9rem 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 0;
+      background: rgba(201, 185, 138, 0.3);
+      transition: background 0.25s ease, transform 0.25s var(--ease-out-expo);
+    }
+
+    .dot.is-on {
+      background: var(--yellow);
+      transform: scaleY(1.35) scaleX(1.6);
+    }
+
+    .dot.is-special {
+      background: var(--special-red);
+    }
+
+    .hint {
+      position: fixed;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      z-index: 20;
+      padding: 0.35rem 0.65rem;
+      border-radius: 0;
+      background: rgba(0, 0, 0, 0.75);
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      opacity: 0.85;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    .tst-mark {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      z-index: 25;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: rgba(243, 226, 160, 0.45);
+      text-transform: uppercase;
+      pointer-events: none;
+      user-select: none;
+    }
+    .tst-mark span {
+      color: rgba(212, 160, 23, 0.7);
+    }
+
+    @media (max-width: 900px) {
+      .board {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 100vh;
+        overflow: auto;
+        gap: 0;
+      }
+      .screen + .screen { border-left: none; border-top: 3px solid var(--yellow); }
+      body { overflow: auto; }
+      .screen { min-height: 90vh; }
+      .slide { position: relative; inset: auto; }
+      .stage { display: flex; flex-direction: column; gap: 1rem; }
+      .desc { white-space: normal; }
+      .items.photo-grid { grid-template-columns: 1fr; }
+    }
+
+
+    /* ——— MOTION (CSS-first: marche même sans GSAP / file://) ——— */
+    @keyframes slideInRow {
+      from { opacity: 0; transform: translateX(48px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes titleIn {
+      from { opacity: 0; transform: translateY(-18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes typeChar {
+      from { opacity: 0; transform: translateY(0.55em) scale(0.85); filter: blur(4px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes pricePop {
+      0% { opacity: 0; transform: scale(0.7); }
+      60% { opacity: 1; transform: scale(1.08); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes glowPulse {
+      0%, 100% {
+        color: var(--yellow-soft);
+        text-shadow: 0 0 0 transparent;
+      }
+      50% {
+        color: #fff8dc;
+        text-shadow:
+          0 0 10px rgba(243, 226, 160, 1),
+          0 0 22px rgba(212, 160, 23, 0.75),
+          0 0 40px rgba(212, 160, 23, 0.4);
+      }
+    }
+    @keyframes focusSweep {
+      0%, 100% { background: transparent; box-shadow: none; }
+      40%, 60% {
+        background: linear-gradient(90deg, rgba(212, 160, 23, 0.22), transparent 75%);
+        box-shadow: inset 4px 0 0 var(--yellow);
+      }
+    }
+    @keyframes ken {
+      from { transform: scale(1.12); }
+      to { transform: scale(1); }
+    }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes curtainL {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+    @keyframes curtainR {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+    @keyframes flashBang {
+      0% { opacity: 0.95; }
+      100% { opacity: 0; }
+    }
+    @keyframes raysSpin {
+      from { opacity: 0.9; transform: scale(1) rotate(0deg); }
+      to { opacity: 0.9; transform: scale(1) rotate(360deg); }
+    }
+    @keyframes photoSlam {
+      0% { opacity: 0; transform: scale(0.65) rotate(-6deg); }
+      70% { opacity: 1; transform: scale(1.06) rotate(1deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes stampIn {
+      0% { opacity: 0; transform: translateX(-50%) scale(1.8) rotate(-16deg); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1) rotate(-8deg); }
+    }
+    @keyframes copyUp {
+      from { opacity: 0; transform: translateY(36px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes stampGlow {
+      0%, 100% { box-shadow: 4px 4px 0 #111, 0 0 0 transparent; }
+      50% { box-shadow: 4px 4px 0 #111, 0 0 24px rgba(255,60,60,0.7), 0 0 48px rgba(212,160,23,0.45); }
+    }
+
+    .slide.is-active .slide-title {
+      animation: titleIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .slide.is-active .item {
+      opacity: 0;
+      animation: slideInRow 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .slide.is-active .item:nth-child(1) { animation-delay: 0.08s; }
+    .slide.is-active .item:nth-child(2) { animation-delay: 0.18s; }
+    .slide.is-active .item:nth-child(3) { animation-delay: 0.28s; }
+    .slide.is-active .item:nth-child(4) { animation-delay: 0.38s; }
+    .slide.is-active .item:nth-child(5) { animation-delay: 0.48s; }
+    .slide.is-active .item:nth-child(6) { animation-delay: 0.58s; }
+
+    .slide.is-active .item .name .ch {
+      opacity: 0;
+      animation: typeChar 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .slide.is-active .item .price {
+      animation: pricePop 0.55s cubic-bezier(0.16, 1, 0.3, 1) both, glowPulse 1.6s ease-in-out 0.7s 2;
+    }
+    .slide.is-active .item .desc {
+      animation: titleIn 0.45s ease both;
+      animation-delay: inherit;
+    }
+
+    .slide.is-active .thumb,
+    .slide.is-active .thumb-full {
+      animation: ken 8s ease-in-out both;
+    }
+
+    .item.is-focus {
+      animation: focusSweep 2.4s ease;
+    }
+    .item.is-focus .name,
+    .item.is-focus .price {
+      animation: glowPulse 2.2s ease-in-out;
+    }
+
+    /* Special CSS orchestration (sans GSAP) */
+    .slide.special-slide.is-playing .special-curtain span:first-child {
+      animation: curtainL 0.7s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+    }
+    .slide.special-slide.is-playing .special-curtain span:last-child {
+      animation: curtainR 0.7s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+    }
+    .slide.special-slide.is-playing .special-flash {
+      animation: flashBang 0.5s ease-out 0.55s forwards;
+    }
+    .slide.special-slide.is-playing .special-rays {
+      animation: raysSpin 8s linear 0.6s infinite;
+      opacity: 0.9;
+    }
+    .slide.special-slide.is-playing .special-photo-wrap {
+      animation: photoSlam 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+    }
+    .slide.special-slide.is-playing .special-stamp {
+      animation: stampIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards, stampGlow 1.2s ease 1.5s 3;
+    }
+    .slide.special-slide.is-playing .special-stamp .ch {
+      opacity: 0;
+      animation: typeChar 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .slide.special-slide.is-playing .special-copy {
+      animation: copyUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.45s forwards;
+    }
+    .slide.special-slide.is-playing .special-copy .name .ch {
+      opacity: 0;
+      animation: typeChar 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .slide.special-slide.is-playing .special-copy .price {
+      animation: glowPulse 1.1s ease-in-out 2s infinite;
+    }
+
+    .name .ch,
+    .special-stamp .ch,
+    .special-copy .name .ch {
+      display: inline-block;
+      opacity: 1;
+      transform: none;
+    }
+
+
+    body.has-rm .slide.is-active .item,
+    body.has-rm .slide.is-active .item .name .ch,
+    body.has-rm .slide.is-active .item .price,
+    body.has-rm .slide.is-active .thumb,
+    body.has-rm .slide.special-slide.is-playing * {
+      animation: none !important;
+    }
+    body.has-rm .slide, body.has-rm .dot { transition: none !important; }
+    body.has-rm .slide.special-slide.is-playing .special-photo-wrap,
+    body.has-rm .slide.special-slide.is-playing .special-stamp,
+    body.has-rm .slide.special-slide.is-playing .special-copy,
+    body.has-rm .slide.special-slide.is-playing .special-rays {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    body.has-rm .slide.special-slide.is-playing .special-curtain { display: none; }
+  </style>
+</head>
+<body>
+  <div class="board" id="board">
+    <section class="screen" data-screen="left" aria-label="Écran entrées et plats">
+      <header class="screen-header">
+        <div class="logo">
+          <div class="logo-mark" aria-hidden="true">
+            <span class="hat"></span>
+            <span class="la">LA</span>
+            <div>
+              <div class="boite">BOITE</div>
+              <div class="jaune">Jaune</div>
+            </div>
+          </div>
+          <div class="logo-copy">
+            <h1>LA BOÎTE JAUNE</h1>
+            <p>Menu board · salle</p>
+          </div>
+        </div>
+        <div class="section-label">Entrées / Plats</div>
+      </header>
+
+      <div class="stage" data-stage="left"></div>
+      <div class="dots" data-dots="left"></div>
+
+      <footer class="screen-footer">
+        <div class="qr">
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Flaboitejaune.loyalty.demo%2Frewards"
+            alt="QR code fidélité (démo)"
+            width="180"
+            height="180"
+          />
+        </div>
+        <div class="loyalty">
+          <h2>Scan · récompenses fidélité</h2>
+          <p>QR démo (non lié)</p>
+        </div>
+      </footer>
+    </section>
+
+    <section class="screen" data-screen="right" aria-label="Écran desserts et boissons">
+      <header class="screen-header">
+        <div class="logo">
+          <div class="logo-mark" aria-hidden="true">
+            <span class="hat"></span>
+            <span class="la">LA</span>
+            <div>
+              <div class="boite">BOITE</div>
+              <div class="jaune">Jaune</div>
+            </div>
+          </div>
+          <div class="logo-copy">
+            <h1>LA BOÎTE JAUNE</h1>
+            <p>Best wings · Montréal</p>
+          </div>
+        </div>
+        <div class="section-label">Desserts / Boissons</div>
+      </header>
+
+      <div class="stage" data-stage="right"></div>
+      <div class="dots" data-dots="right"></div>
+
+      <footer class="screen-footer">
+        <div class="qr">
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Flaboitejaune.loyalty.demo%2Frewards"
+            alt="QR code fidélité (démo)"
+            width="180"
+            height="180"
+          />
+        </div>
+        <div class="loyalty">
+          <h2>Scan · récompenses fidélité</h2>
+          <p>QR démo (non lié)</p>
+        </div>
+      </footer>
+    </section>
+  </div>
+
+  <div class="hint" id="hint">F11 plein écran · Special Combo #3 à gauche</div>
+  <div class="tst-mark" aria-label="Propriété TsT">Propriété <span>TsT</span></div>
+
+  <script>
+    const LEFT_SLIDES = [
+      {
+        type: "special",
+        duration: 11000,
+        name: "Combo #3",
+        desc: "8 ailes glacées + mac n cheese crémeux",
+        price: "29,25 $",
+        image: "assets/combo-mac.png",
+        stamp: "SPECIAL DU JOUR",
+        eyebrow: "Le plus demandé",
+      },
+      {
+        title: "Combos photo",
+        layout: "photo-grid",
+        items: [
+          {
+            name: "Combo #2",
+            desc: "8 ailes + plantains",
+            price: "25,35 $",
+            image: "assets/combo-plantains.png",
+            featured: true,
+          },
+          {
+            name: "Ailes signature",
+            desc: "Glaze maison",
+            price: "31,49 $",
+            image: "assets/ailes-jaune.png",
+            badges: ["Le + demandé"],
+            featured: true,
+          },
+          {
+            name: "Ailes sésame",
+            desc: "Chili + citron",
+            price: "31,49 $",
+            image: "assets/ailes-sesame.png",
+          },
+          {
+            name: "Mac n Cheese",
+            desc: "Grand · 3 fromages",
+            price: "12,00 $",
+            image: "assets/mac-fromage.png",
+            badges: ["Must try"],
+            featured: true,
+          },
+        ],
+      },
+      {
+        title: "À-côtés & extras",
+        items: [
+          {
+            name: "Poutine maison",
+            desc: "Frites · fromage · sauce",
+            price: "11,99 $",
+            image: "assets/poutine.png",
+            badges: ["Nouveau"],
+            featured: true,
+          },
+          {
+            name: "Combo #6",
+            desc: "12 ailes + mac n cheese",
+            price: "35,75 $",
+            image: "assets/combo-mac.png",
+            badges: ["Le + demandé"],
+            featured: true,
+          },
+          {
+            name: "Ailes 20 mcx",
+            desc: "Idéal à partager",
+            price: "49,99 $",
+            image: "assets/ailes-sesame.png",
+          },
+          {
+            name: "Plantains salés",
+            desc: "Portion",
+            price: "5,19 $",
+            image: "assets/combo-plantains.png",
+          },
+        ],
+      },
+      {
+        title: "Liste combos",
+        items: [
+          { name: "Combo #1", desc: "8 ailes + frites", price: "26,65 $" },
+          { name: "Combo #4", desc: "12 ailes + frites", price: "33,15 $" },
+          { name: "Combo #5", desc: "12 ailes + plantains", price: "31,85 $" },
+          { name: "Combo #7", desc: "20 ailes + frites", price: "53,95 $" },
+          { name: "SPECIAL Combo #1", desc: "5 ailes + frites", price: "18,85 $", badges: ["Special"], featured: true },
+        ],
+      },
+    ];
+
+    const RIGHT_SLIDES = [
+      {
+        title: "Desserts",
+        duration: 8000,
+        items: [
+          { name: "Brownie chocolat", desc: "Fondant maison", price: "5,49 $", badges: ["Le + demandé"], featured: true },
+          { name: "Gâteau fromage", desc: "Tranche", price: "6,49 $", featured: true },
+          { name: "Cookies double chip", desc: "2 pièces", price: "4,99 $" },
+          { name: "Soft serve", desc: "Vanille / chocolat", price: "3,99 $" },
+          { name: "Milkshake maison", desc: "Choco / fraise / vanille", price: "6,99 $", badges: ["Nouveau"], featured: true },
+        ],
+      },
+      {
+        title: "Boissons froides",
+        duration: 8500,
+        items: [
+          { name: "Coca-Cola / Diet", desc: "Canette 355 ml", price: "2,99 $", featured: true },
+          { name: "Sprite / Fanta", desc: "Canette 355 ml", price: "2,99 $" },
+          { name: "Jus tropical", desc: "Mangue ou ananas", price: "3,99 $", badges: ["Populaire"], featured: true },
+          { name: "Thé glacé maison", desc: "Citron / pêche", price: "3,49 $" },
+          { name: "Eau / Perrier", desc: "Bouteille", price: "2,49 $" },
+        ],
+      },
+      {
+        title: "Boissons chaudes",
+        items: [
+          { name: "Café filtre", desc: "Régulier ou décaf", price: "2,75 $" },
+          { name: "Chocolat chaud", desc: "Crémeux", price: "3,50 $", featured: true },
+          { name: "Thé / tisane", desc: "Sélection du jour", price: "2,75 $" },
+        ],
+      },
+    ];
+
+    const DEFAULT_SLIDE_MS = 8500;
+    /* Demo TV board: motion ON by default. Add ?rm=1 to disable. */
+    const REDUCE = new URLSearchParams(location.search).has("rm");
+    if (REDUCE) document.body.classList.add("has-rm");
+    const HAS_GSAP = typeof window.gsap !== "undefined";
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function splitChars(text, delayStart = 0, step = 0.028) {
+      let i = 0;
+      return [...String(text)].map((ch) => {
+        const delay = (delayStart + i * step).toFixed(3);
+        i += 1;
+        if (ch === " ") return `<span class="ch sp" style="animation-delay:${delay}s">&nbsp;</span>`;
+        return `<span class="ch" style="animation-delay:${delay}s">${escapeHtml(ch)}</span>`;
+      }).join("");
+    }
+
+    function badgeClass(label) {
+      const l = String(label).toLowerCase();
+      if (l.includes("special") || l.includes("add-on") || l.includes("nouveau")) return "badge special";
+      return "badge";
+    }
+
+    function badgesHtml(badges) {
+      if (!badges || !badges.length) return "";
+      return `<div class="badges">${badges.map((b) => `<span class="${badgeClass(b)}">${b}</span>`).join("")}</div>`;
+    }
+
+    function renderSpecialSlide(slide, index) {
+      return `
+        <div class="slide special-slide" data-index="${index}" data-type="special">
+          <div class="special-hero">
+            <div class="special-bg"></div>
+            <div class="special-rays" aria-hidden="true"></div>
+            <div class="special-photo-wrap">
+              <img src="${slide.image}" alt="${slide.name}" draggable="false" />
+            </div>
+            <div class="special-stamp" data-full="${escapeHtml(slide.stamp || "SPECIAL")}">${splitChars(slide.stamp || "SPECIAL", 1.15, 0.04)}</div>
+            <div class="special-copy">
+              <div>
+                <div class="eyebrow">${escapeHtml(slide.eyebrow || "Special")}</div>
+                <div class="name" data-full="${escapeHtml(slide.name)}">${splitChars(slide.name, 1.55, 0.035)}</div>
+                <div class="desc">${escapeHtml(slide.desc)}</div>
+              </div>
+              <div class="price">${escapeHtml(slide.price)}</div>
+            </div>
+            <div class="special-flash" aria-hidden="true"></div>
+            <div class="special-curtain" aria-hidden="true"><span></span><span></span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderItem(item, layout) {
+      const badges = badgesHtml(item.badges);
+      if (layout === "photo-grid" && item.image) {
+        return `
+          <article class="item photo-card ${item.featured ? "featured" : ""}">
+            <img class="thumb-full" src="${item.image}" alt="${escapeHtml(item.name)}" draggable="false" />
+            <div class="card-meta">
+              <div class="item-main">
+                ${badges}
+                <div class="name" data-full="${escapeHtml(item.name)}">${splitChars(item.name, 0.15, 0.022)}</div>
+                <div class="desc">${escapeHtml(item.desc)}</div>
+              </div>
+              <div class="price">${escapeHtml(item.price)}</div>
+            </div>
+          </article>
+        `;
+      }
+
+      if (item.image) {
+        return `
+          <article class="item with-photo ${item.featured ? "featured" : ""}">
+            <img class="thumb" src="${item.image}" alt="${escapeHtml(item.name)}" draggable="false" />
+            <div class="item-main">
+              ${badges}
+              <div class="name" data-full="${escapeHtml(item.name)}">${splitChars(item.name, 0.15, 0.022)}</div>
+              <div class="desc">${escapeHtml(item.desc)}</div>
+            </div>
+            <div class="price">${escapeHtml(item.price)}</div>
+          </article>
+        `;
+      }
+
+      return `
+        <article class="item ${item.featured ? "featured" : ""}">
+          <div class="item-main">
+            ${badges}
+            <div class="name" data-full="${escapeHtml(item.name)}">${splitChars(item.name, 0.15, 0.022)}</div>
+            <div class="desc">${escapeHtml(item.desc)}</div>
+          </div>
+          <div class="price">${escapeHtml(item.price)}</div>
+        </article>
+      `;
+    }
+
+    function renderSlide(slide, index) {
+      if (slide.type === "special") return renderSpecialSlide(slide, index);
+
+      const layout = slide.layout || "list";
+      const items = (slide.items || []).map((item) => renderItem(item, layout)).join("");
+      return `
+        <div class="slide" data-index="${index}">
+          <div class="slide-title">${slide.title}</div>
+          <div class="items ${layout === "photo-grid" ? "photo-grid" : ""}">${items}</div>
+        </div>
+      `;
+    }
+
+    function mountScreen(side, slides) {
+      const stage = document.querySelector(`[data-stage="${side}"]`);
+      const dots = document.querySelector(`[data-dots="${side}"]`);
+      stage.innerHTML = slides.map(renderSlide).join("");
+      dots.innerHTML = slides
+        .map((s, i) => `<span class="dot ${s.type === "special" ? "is-special" : ""}" data-i="${i}"></span>`)
+        .join("");
+
+      const slideEls = [...stage.querySelectorAll(".slide")];
+      const dotEls = [...dots.querySelectorAll(".dot")];
+      let current = 0;
+      let focusTimer = null;
+      let cycleTimer = null;
+      let specialTl = null;
+      let focusTl = null;
+      let enterTl = null;
+
+      function clearFocus() {
+        if (focusTl) focusTl.kill();
+        stage.querySelectorAll(".item.is-focus").forEach((el) => el.classList.remove("is-focus"));
+      }
+
+      function prepareNameLetters(nameEl, delayStart = 0.12) {
+        const full = nameEl.dataset.full || nameEl.textContent.replace(/\u00a0/g, " ");
+        nameEl.dataset.full = full;
+        nameEl.innerHTML = splitChars(full, delayStart, 0.022);
+        return [...nameEl.querySelectorAll(".ch")];
+      }
+
+      function runFocusPass() {
+        clearFocus();
+        const active = slideEls[current];
+        if (!active || active.dataset.type === "special") return;
+        const items = [...active.querySelectorAll(".item")];
+        if (!items.length || REDUCE) return;
+
+        let i = 0;
+        const tick = () => {
+          items.forEach((el) => el.classList.remove("is-focus"));
+          items[i % items.length].classList.add("is-focus");
+          i += 1;
+        };
+        tick();
+        focusTl = { kill() { clearInterval(focusTl._id); } };
+        focusTl._id = setInterval(tick, 2600);
+      }
+
+      function staggerItems(active) {
+        if (enterTl && enterTl.kill) enterTl.kill();
+        const items = [...active.querySelectorAll(".item")];
+        if (!items.length) return;
+
+        /* Retrigger CSS animations: remove active briefly handled in show();
+           here we (re)split letters so Typewriter delays are fresh. */
+        items.forEach((item, idx) => {
+          const name = item.querySelector(".name");
+          if (name) prepareNameLetters(name, 0.1 + idx * 0.1);
+        });
+
+        if (HAS_GSAP && !REDUCE) {
+          const prices = items.map((item) => item.querySelector(".price")).filter(Boolean);
+          enterTl = gsap.timeline();
+          enterTl.fromTo(
+            prices,
+            { scale: 0.85 },
+            { scale: 1, duration: 0.45, stagger: 0.1, ease: "power3.out", delay: 0.35 }
+          );
+        }
+      }
+
+      function resetSpecialProps(el) {
+        const stamp = el.querySelector(".special-stamp");
+        const name = el.querySelector(".special-copy .name");
+        if (stamp?.dataset.full) {
+          stamp.innerHTML = splitChars(stamp.dataset.full, 1.15, 0.04);
+        }
+        if (name?.dataset.full) {
+          name.innerHTML = splitChars(name.dataset.full, 1.55, 0.035);
+        }
+        el.classList.remove("is-playing");
+        if (HAS_GSAP) {
+          gsap.killTweensOf(el.querySelectorAll("*"));
+        }
+      }
+
+      function playSpecial(el) {
+        if (specialTl && specialTl.kill) specialTl.kill();
+        resetSpecialProps(el);
+
+        /* CSS orchestration: force reflow then is-playing */
+        void el.offsetWidth;
+        el.classList.add("is-playing");
+
+        if (HAS_GSAP && !REDUCE) {
+          const photo = el.querySelector(".special-photo-wrap");
+          const price = el.querySelector(".special-copy .price");
+          specialTl = gsap.timeline();
+          if (photo) {
+            specialTl.to(photo, { scale: 1.03, duration: 4, yoyo: true, repeat: 1, ease: "sine.inOut", delay: 1.4 });
+          }
+          if (price) {
+            specialTl.to(price, { scale: 1.06, duration: 0.45, yoyo: true, repeat: 3, ease: "sine.inOut" }, 2.1);
+          }
+        }
+      }
+
+      function show(next) {
+        const prev = current;
+        if (specialTl && specialTl.kill) {
+          specialTl.kill();
+          specialTl = null;
+        }
+        if (enterTl && enterTl.kill) {
+          enterTl.kill();
+          enterTl = null;
+        }
+        clearFocus();
+        clearTimeout(focusTimer);
+
+        slideEls.forEach((el, i) => {
+          el.classList.remove("is-active", "is-exit", "is-playing");
+          if (i === prev && prev !== next) el.classList.add("is-exit");
+        });
+
+        /* Retrigger CSS enter animations by toggling active off→on */
+        const active = slideEls[next];
+        void active.offsetWidth;
+        active.classList.add("is-active");
+        dotEls.forEach((d, i) => d.classList.toggle("is-on", i === next));
+        current = next;
+
+        if (active?.dataset.type === "special") {
+          playSpecial(active);
+        } else {
+          staggerItems(active);
+          focusTimer = setTimeout(runFocusPass, 900);
+        }
+
+        clearTimeout(cycleTimer);
+        const duration = slides[next].duration || DEFAULT_SLIDE_MS;
+        cycleTimer = setTimeout(() => show((current + 1) % slides.length), duration);
+      }
+
+      show(0);
+      return { show };
+    }
+
+    function applyScreenParam() {
+      const params = new URLSearchParams(location.search);
+      const screen = params.get("screen");
+      if (screen === "left" || screen === "right") {
+        document.body.classList.add("single");
+        document.querySelector(`[data-screen="${screen}"]`)?.classList.add("active-single");
+      }
+    }
+
+    applyScreenParam();
+    mountScreen("left", LEFT_SLIDES);
+    mountScreen("right", RIGHT_SLIDES);
+
+    /* Anti-téléchargement démo client (pas une protection absolue) */
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+    document.addEventListener("dragstart", (e) => e.preventDefault());
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      const block = (e.ctrlKey || e.metaKey) && ["s", "u", "p", "c"].includes(key);
+      const blockF12 = e.key === "F12";
+      const blockI = (e.ctrlKey || e.metaKey) && e.shiftKey && key === "i";
+      if (block || blockF12 || blockI) e.preventDefault();
+    });
+
+    setTimeout(() => {
+      const hint = document.getElementById("hint");
+      if (hint) hint.style.opacity = "0";
+    }, 7000);
+  </script>
+</body>
+</html>
